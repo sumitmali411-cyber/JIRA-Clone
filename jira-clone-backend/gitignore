@@ -1,0 +1,39 @@
+### 🚫 Compiled class files
+*.class
+
+### 🚫 Logs
+*.log
+logs/
+*.out
+
+### 🚫 Spring Boot
+target/
+build/
+!.mvn/wrapper/maven-wrapper.jar
+
+### 🚫 Maven
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.properties
+dependency-reduced-pom.xml
+
+### 🚫 Gradle (if ever used)
+.gradle/
+build/
+
+### 🚫 IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+### 🚫 OS
+.DS_Store
+Thumbs.db
+
+### 🚫 Application properties (if sensitive)
+application-local.yml
+application-local.properties
+
+### 🚫 Test reports
+surefire-reports/
