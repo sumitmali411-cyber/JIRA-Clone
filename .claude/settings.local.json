@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(java:*)",
+      "Bash(mvn wrapper:wrapper:*)",
+      "Bash(npm install:*)"
+    ]
+  }
+}
