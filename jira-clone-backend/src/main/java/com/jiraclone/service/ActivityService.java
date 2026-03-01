@@ -2,12 +2,12 @@ package com.jiraclone.service;
 
 import com.jiraclone.model.ActivityLog;
 import com.jiraclone.model.Issue;
-import com.jiraclone.storage.DataStore;
+import com.jiraclone.repository.ActivityLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -16,13 +16,10 @@ import java.util.UUID;
 public class ActivityService {
 
     @Autowired
-    private DataStore dataStore;
+    private ActivityLogRepository activityLogRepository;
 
     public List<ActivityLog> getByIssueId(String issueId) {
-        return dataStore.readActivity().stream()
-                .filter(a -> a.getIssueId().equals(issueId))
-                .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
-                .toList();
+        return activityLogRepository.findByIssueIdOrderByTimestampDesc(issueId);
     }
 
     public void recordCreation(Issue issue, String actor) {
@@ -53,9 +50,9 @@ public class ActivityService {
         }
     }
 
+    @Transactional
     public void recordChange(String issueId, String projectId, String actor,
                               String field, String oldValue, String newValue, String action) {
-        List<ActivityLog> logs = new ArrayList<>(dataStore.readActivity());
         ActivityLog log = new ActivityLog();
         log.setId(UUID.randomUUID().toString());
         log.setIssueId(issueId);
@@ -66,7 +63,6 @@ public class ActivityService {
         log.setNewValue(newValue);
         log.setAction(action);
         log.setTimestamp(Instant.now());
-        logs.add(log);
-        dataStore.writeActivity(logs);
+        activityLogRepository.save(log);
     }
 }

@@ -3,12 +3,12 @@ package com.jiraclone.service;
 import com.jiraclone.dto.SprintDto;
 import com.jiraclone.model.Sprint;
 import com.jiraclone.model.enums.SprintStatus;
-import com.jiraclone.storage.DataStore;
+import com.jiraclone.repository.SprintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,22 +17,18 @@ import java.util.UUID;
 public class SprintService {
 
     @Autowired
-    private DataStore dataStore;
+    private SprintRepository sprintRepository;
 
     public List<Sprint> getByProjectId(String projectId) {
-        return dataStore.readSprints().stream()
-                .filter(s -> s.getProjectId().equals(projectId))
-                .toList();
+        return sprintRepository.findByProjectId(projectId);
     }
 
     public Optional<Sprint> getById(String id) {
-        return dataStore.readSprints().stream()
-                .filter(s -> s.getId().equals(id))
-                .findFirst();
+        return sprintRepository.findById(id);
     }
 
+    @Transactional
     public Sprint create(String projectId, SprintDto dto) {
-        List<Sprint> sprints = new ArrayList<>(dataStore.readSprints());
         Sprint sprint = new Sprint();
         sprint.setId(UUID.randomUUID().toString());
         sprint.setProjectId(projectId);
@@ -43,61 +39,53 @@ public class SprintService {
         sprint.setEndDate(dto.getEndDate());
         sprint.setCreatedAt(Instant.now());
         sprint.setUpdatedAt(Instant.now());
-        sprints.add(sprint);
-        dataStore.writeSprints(sprints);
-        return sprint;
+        return sprintRepository.save(sprint);
     }
 
+    @Transactional
     public Sprint update(String id, SprintDto dto) {
-        List<Sprint> sprints = new ArrayList<>(dataStore.readSprints());
-        Sprint sprint = sprints.stream().filter(s -> s.getId().equals(id))
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("Sprint not found: " + id));
+        Sprint sprint = sprintRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Sprint not found: " + id));
         if (dto.getName() != null) sprint.setName(dto.getName());
         if (dto.getGoal() != null) sprint.setGoal(dto.getGoal());
         if (dto.getStartDate() != null) sprint.setStartDate(dto.getStartDate());
         if (dto.getEndDate() != null) sprint.setEndDate(dto.getEndDate());
         sprint.setUpdatedAt(Instant.now());
-        dataStore.writeSprints(sprints);
-        return sprint;
+        return sprintRepository.save(sprint);
     }
 
+    @Transactional
     public Sprint start(String id) {
-        List<Sprint> sprints = new ArrayList<>(dataStore.readSprints());
-        // Check no other active sprint in same project
-        Sprint sprint = sprints.stream().filter(s -> s.getId().equals(id))
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("Sprint not found: " + id));
-        boolean hasActive = sprints.stream()
-                .anyMatch(s -> s.getProjectId().equals(sprint.getProjectId())
-                        && s.getStatus() == SprintStatus.ACTIVE
-                        && !s.getId().equals(id));
-        if (hasActive) throw new IllegalStateException("Another sprint is already active in this project");
+        Sprint sprint = sprintRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Sprint not found: " + id));
+        if (sprintRepository.existsByProjectIdAndStatusAndIdNot(sprint.getProjectId(), SprintStatus.ACTIVE, id)) {
+            throw new IllegalStateException("Another sprint is already active in this project");
+        }
         sprint.setStatus(SprintStatus.ACTIVE);
         sprint.setUpdatedAt(Instant.now());
-        dataStore.writeSprints(sprints);
-        return sprint;
+        return sprintRepository.save(sprint);
     }
 
+    @Transactional
     public Sprint complete(String id) {
-        List<Sprint> sprints = new ArrayList<>(dataStore.readSprints());
-        Sprint sprint = sprints.stream().filter(s -> s.getId().equals(id))
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("Sprint not found: " + id));
+        Sprint sprint = sprintRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Sprint not found: " + id));
         sprint.setStatus(SprintStatus.COMPLETED);
         sprint.setCompletedAt(Instant.now());
         sprint.setUpdatedAt(Instant.now());
-        dataStore.writeSprints(sprints);
-        return sprint;
+        return sprintRepository.save(sprint);
     }
 
+    @Transactional
     public void delete(String id) {
-        List<Sprint> sprints = new ArrayList<>(dataStore.readSprints());
-        boolean removed = sprints.removeIf(s -> s.getId().equals(id));
-        if (!removed) throw new IllegalArgumentException("Sprint not found: " + id);
-        dataStore.writeSprints(sprints);
+        if (!sprintRepository.existsById(id)) {
+            throw new IllegalArgumentException("Sprint not found: " + id);
+        }
+        sprintRepository.deleteById(id);
     }
 
+    @Transactional
     public void deleteByProjectId(String projectId) {
-        List<Sprint> sprints = new ArrayList<>(dataStore.readSprints());
-        sprints.removeIf(s -> s.getProjectId().equals(projectId));
-        dataStore.writeSprints(sprints);
+        sprintRepository.deleteByProjectId(projectId);
     }
 }

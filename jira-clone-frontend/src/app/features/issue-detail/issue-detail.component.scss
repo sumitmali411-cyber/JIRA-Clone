@@ -1,0 +1,145 @@
+.loading-center {
+  display: flex; justify-content: center; align-items: center; height: 60vh;
+}
+
+.issue-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 2rem;
+  align-items: start;
+  max-width: 1200px;
+}
+
+.issue-main {
+  background: var(--p-surface-card);
+  border: 1px solid var(--p-surface-border);
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  color: var(--p-primary-color); cursor: pointer; font-size: 0.875rem;
+  margin-bottom: 1.25rem;
+  &:hover { text-decoration: underline; }
+}
+
+.issue-meta-top {
+  display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;
+}
+
+.type-badge {
+  color: white; font-size: 0.7rem; font-weight: 700;
+  padding: 0.2rem 0.5rem; border-radius: 3px;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+.issue-key-label {
+  font-size: 0.875rem; font-weight: 600; color: var(--p-primary-color);
+}
+
+.issue-summary {
+  font-size: 1.4rem; font-weight: 700; color: var(--p-text-color);
+  margin: 0; cursor: pointer; line-height: 1.35;
+  &:hover { text-decoration: underline dotted; }
+}
+
+.edit-inline {
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+
+.edit-actions {
+  display: flex; gap: 0.4rem;
+}
+
+.summary-input { font-size: 1.1rem; font-weight: 600; }
+
+.description-section {
+  h4 { font-size: 0.875rem; font-weight: 600; color: var(--p-text-muted-color);
+       text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+}
+
+.description-content {
+  cursor: pointer; min-height: 60px; padding: 0.5rem;
+  border-radius: 4px; transition: background 0.15s;
+  &:hover { background: var(--p-surface-hover); }
+  p { margin: 0; font-size: 0.9rem; line-height: 1.6; }
+}
+
+.empty-text { color: var(--p-text-muted-color); font-style: italic; font-size: 0.875rem; }
+
+.comments-section {
+  h4 { font-size: 0.875rem; font-weight: 600; color: var(--p-text-muted-color);
+       text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+}
+
+.comment-item {
+  display: flex; gap: 0.75rem; margin-bottom: 1rem;
+}
+
+.comment-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--p-primary-color); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+}
+
+.comment-body { flex: 1; }
+
+.comment-header {
+  display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;
+}
+
+.comment-author { font-weight: 600; font-size: 0.85rem; }
+
+.comment-date { font-size: 0.75rem; color: var(--p-text-muted-color); }
+
+.edited-tag {
+  font-size: 0.7rem; color: var(--p-text-muted-color);
+  background: var(--p-surface-ground); padding: 0.1rem 0.3rem; border-radius: 2px;
+}
+
+.delete-comment { margin-left: auto; }
+
+.comment-text { font-size: 0.875rem; line-height: 1.5; color: var(--p-text-color); }
+
+.add-comment {
+  display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;
+  align-items: flex-end;
+}
+
+/* Sidebar */
+.issue-sidebar { position: sticky; top: 0; }
+
+.sidebar-card {
+  background: var(--p-surface-card);
+  border: 1px solid var(--p-surface-border);
+  border-radius: 10px; padding: 1.25rem;
+  h5 { font-size: 0.875rem; font-weight: 600; margin: 0 0 1rem;
+       color: var(--p-text-muted-color); text-transform: uppercase; letter-spacing: 0.05em; }
+}
+
+.detail-row {
+  display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1rem;
+}
+
+.detail-label {
+  font-size: 0.75rem; font-weight: 600; color: var(--p-text-muted-color);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+.detail-value { font-size: 0.875rem; color: var(--p-text-color); }
+
+.detail-select { width: 100% !important; }
+.detail-input { width: 100%; font-size: 0.875rem; }
+
+.priority-display { display: flex; align-items: center; gap: 0.4rem; }
+
+.labels-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+.label-chip {
+  font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 3px;
+  background: var(--p-primary-100, #e0f0ff); color: var(--p-primary-color);
+}
+
+.w-full { width: 100%; }

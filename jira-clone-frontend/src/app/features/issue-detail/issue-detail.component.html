@@ -1,0 +1,168 @@
+<p-toast />
+
+@if (loading) {
+  <div class="loading-center"><p-progressSpinner /></div>
+} @else if (issue) {
+  <div class="issue-layout">
+    <!-- Left: Main content -->
+    <div class="issue-main">
+      <div class="back-link" (click)="goBack()">
+        <i class="pi pi-arrow-left"></i> Back to Board
+      </div>
+
+      <!-- Issue Key & Type -->
+      <div class="issue-meta-top">
+        <span class="type-badge" [style.background]="getTypeColor(issue.type)">{{ issue.type }}</span>
+        <span class="issue-key-label">{{ issue.issueKey }}</span>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary-section">
+        @if (!editingSummary) {
+          <h1 class="issue-summary" (click)="startEditSummary()">{{ issue.summary }}</h1>
+        } @else {
+          <div class="edit-inline">
+            <input pInputText [(ngModel)]="summaryEdit" class="w-full summary-input" />
+            <div class="edit-actions">
+              <p-button icon="pi pi-check" size="small" (onClick)="saveSummary()" />
+              <p-button icon="pi pi-times" severity="secondary" size="small" (onClick)="editingSummary = false" />
+            </div>
+          </div>
+        }
+      </div>
+
+      <p-divider />
+
+      <!-- Description -->
+      <div class="description-section">
+        <h4>Description</h4>
+        @if (!editingDescription) {
+          <div class="description-content" (click)="startEditDescription()">
+            @if (issue.description) {
+              <p [innerHTML]="issue.description"></p>
+            } @else {
+              <span class="empty-text">Click to add a description...</span>
+            }
+          </div>
+        } @else {
+          <div class="edit-inline">
+            <textarea pTextarea [(ngModel)]="descriptionEdit" rows="6" class="w-full"></textarea>
+            <div class="edit-actions">
+              <p-button label="Save" size="small" (onClick)="saveDescription()" />
+              <p-button label="Cancel" severity="secondary" size="small" (onClick)="editingDescription = false" />
+            </div>
+          </div>
+        }
+      </div>
+
+      <p-divider />
+
+      <!-- Comments -->
+      <div class="comments-section">
+        <h4>Comments ({{ comments.length }})</h4>
+
+        @for (comment of comments; track comment.id) {
+          <div class="comment-item">
+            <div class="comment-avatar">{{ comment.author?.[0]?.toUpperCase() || 'U' }}</div>
+            <div class="comment-body">
+              <div class="comment-header">
+                <span class="comment-author">{{ comment.author || 'Unknown' }}</span>
+                <span class="comment-date">{{ comment.createdAt | date:'medium' }}</span>
+                @if (comment.edited) {
+                  <span class="edited-tag">edited</span>
+                }
+                <p-button icon="pi pi-trash" severity="danger" size="small"
+                          class="delete-comment"
+                          (onClick)="deleteComment(comment.id)" />
+              </div>
+              <div class="comment-text">{{ comment.body }}</div>
+            </div>
+          </div>
+        }
+
+        <div class="add-comment">
+          <textarea pTextarea [(ngModel)]="newComment" placeholder="Add a comment..."
+                    rows="3" class="w-full"></textarea>
+          <p-button label="Add Comment" icon="pi pi-send" size="small"
+                    [loading]="addingComment" [disabled]="!newComment.trim()"
+                    (onClick)="addComment()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Sidebar details -->
+    <div class="issue-sidebar">
+      <div class="sidebar-card">
+        <h5>Details</h5>
+
+        <div class="detail-row">
+          <span class="detail-label">Status</span>
+          <p-select [(ngModel)]="issue.status"
+                    [options]="statusOptions" optionLabel="label" optionValue="value"
+                    (onChange)="updateStatus($event.value)"
+                    styleClass="detail-select" />
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Priority</span>
+          <div class="priority-display">
+            <i [class]="getPriorityIcon(issue.priority)"
+               [style.color]="getPriorityColor(issue.priority)"></i>
+            <p-select [(ngModel)]="issue.priority"
+                      [options]="priorityOptions" optionLabel="label" optionValue="value"
+                      (onChange)="updatePriority($event.value)"
+                      styleClass="detail-select" />
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Assignee</span>
+          <input pInputText [(ngModel)]="issue.assignee"
+                 placeholder="Unassigned"
+                 (blur)="updateAssignee(issue.assignee)"
+                 class="detail-input" />
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Reporter</span>
+          <span class="detail-value">{{ issue.reporter || '—' }}</span>
+        </div>
+
+        @if (issue.storyPoints != null) {
+          <div class="detail-row">
+            <span class="detail-label">Story Points</span>
+            <span class="detail-value">{{ issue.storyPoints }}</span>
+          </div>
+        }
+
+        @if (issue.dueDate) {
+          <div class="detail-row">
+            <span class="detail-label">Due Date</span>
+            <span class="detail-value">{{ issue.dueDate | date:'mediumDate' }}</span>
+          </div>
+        }
+
+        <div class="detail-row">
+          <span class="detail-label">Created</span>
+          <span class="detail-value">{{ issue.createdAt | date:'mediumDate' }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Updated</span>
+          <span class="detail-value">{{ issue.updatedAt | date:'medium' }}</span>
+        </div>
+
+        @if (issue.labels?.length) {
+          <div class="detail-row labels-row">
+            <span class="detail-label">Labels</span>
+            <div class="labels-list">
+              @for (label of issue.labels; track label) {
+                <span class="label-chip">{{ label }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

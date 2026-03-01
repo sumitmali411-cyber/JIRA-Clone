@@ -1,0 +1,153 @@
+<p-toast />
+
+@if (loading) {
+  <div class="loading-center"><p-progressSpinner /></div>
+} @else if (project) {
+  <div class="backlog-header">
+    <div class="breadcrumb">
+      <a routerLink="/projects">Projects</a>
+      <i class="pi pi-angle-right"></i>
+      <span>{{ project.name }}</span>
+      <i class="pi pi-angle-right"></i>
+      <span>Backlog</span>
+    </div>
+    <div class="header-actions">
+      <a [routerLink]="['/projects', project.id, 'board']">
+        <p-button label="Board" icon="pi pi-th-large" severity="secondary" size="small" />
+      </a>
+      <p-button label="Create Sprint" icon="pi pi-plus" severity="secondary" size="small"
+                (onClick)="openSprintDialog()" />
+      <p-button label="Create Issue" icon="pi pi-plus" size="small" (onClick)="openIssueDialog()" />
+    </div>
+  </div>
+
+  <!-- Sprints -->
+  @for (sprint of sprints; track sprint.id) {
+    <div class="sprint-section">
+      <div class="sprint-header">
+        <div class="sprint-info">
+          <i class="pi pi-flag sprint-icon"></i>
+          <span class="sprint-name">{{ sprint.name }}</span>
+          <p-tag [value]="sprint.status" [severity]="getSprintStatusSeverity(sprint.status)" />
+          <span class="issue-count">{{ sprintIssues(sprint.id).length }} issues</span>
+        </div>
+        <div class="sprint-actions">
+          @if (sprint.status === 'PLANNED') {
+            <p-button label="Start Sprint" size="small" severity="info" (onClick)="startSprint(sprint)" />
+          }
+          @if (sprint.status === 'ACTIVE') {
+            <p-button label="Complete Sprint" size="small" severity="warn" (onClick)="completeSprint(sprint)" />
+          }
+        </div>
+      </div>
+
+      <div class="issue-list">
+        @for (issue of sprintIssues(sprint.id); track issue.id) {
+          <div class="issue-row" (click)="openIssue(issue)">
+            <i [class]="getTypeIcon(issue.type)" class="issue-type-icon"></i>
+            <span class="issue-key">{{ issue.issueKey }}</span>
+            <span class="issue-summary">{{ issue.summary }}</span>
+            <div class="issue-row-meta">
+              <i [class]="getPriorityIcon(issue.priority)"></i>
+              <span class="issue-status">{{ issue.status }}</span>
+              @if (issue.assignee) {
+                <span class="assignee-chip">{{ issue.assignee }}</span>
+              }
+            </div>
+          </div>
+        }
+        @if (sprintIssues(sprint.id).length === 0) {
+          <div class="empty-sprint">No issues in this sprint</div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Backlog -->
+  <div class="sprint-section">
+    <div class="sprint-header">
+      <div class="sprint-info">
+        <i class="pi pi-inbox sprint-icon"></i>
+        <span class="sprint-name">Backlog</span>
+        <span class="issue-count">{{ backlogIssues.length }} issues</span>
+      </div>
+    </div>
+    <div class="issue-list">
+      @for (issue of backlogIssues; track issue.id) {
+        <div class="issue-row" (click)="openIssue(issue)">
+          <i [class]="getTypeIcon(issue.type)" class="issue-type-icon"></i>
+          <span class="issue-key">{{ issue.issueKey }}</span>
+          <span class="issue-summary">{{ issue.summary }}</span>
+          <div class="issue-row-meta">
+            <i [class]="getPriorityIcon(issue.priority)"></i>
+            <span class="issue-status">{{ issue.status }}</span>
+            @if (issue.assignee) {
+              <span class="assignee-chip">{{ issue.assignee }}</span>
+            }
+          </div>
+        </div>
+      }
+      @if (backlogIssues.length === 0) {
+        <div class="empty-sprint">Backlog is empty</div>
+      }
+    </div>
+  </div>
+}
+
+<!-- Sprint Dialog -->
+<p-dialog header="Create Sprint" [(visible)]="showSprintDialog" [modal]="true"
+          [style]="{ width: '420px' }" [draggable]="false">
+  <div class="dialog-form">
+    <div class="form-group">
+      <label>Sprint Name *</label>
+      <input pInputText [(ngModel)]="sprintForm.name" placeholder="Sprint 1" class="w-full" />
+    </div>
+    <div class="form-group">
+      <label>Goal</label>
+      <textarea pTextarea [(ngModel)]="sprintForm.goal" placeholder="Sprint goal..." rows="2" class="w-full"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Start Date</label>
+        <input pInputText [(ngModel)]="sprintForm.startDate" type="date" class="w-full" />
+      </div>
+      <div class="form-group">
+        <label>End Date</label>
+        <input pInputText [(ngModel)]="sprintForm.endDate" type="date" class="w-full" />
+      </div>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showSprintDialog = false" />
+    <p-button label="Create" [loading]="submitting" [disabled]="!sprintForm.name" (onClick)="createSprint()" />
+  </ng-template>
+</p-dialog>
+
+<!-- Issue Dialog -->
+<p-dialog header="Create Issue" [(visible)]="showIssueDialog" [modal]="true"
+          [style]="{ width: '500px' }" [draggable]="false">
+  <div class="dialog-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Type</label>
+        <p-select [(ngModel)]="issueForm.type" [options]="typeOptions" optionLabel="label" optionValue="value" class="w-full" />
+      </div>
+      <div class="form-group">
+        <label>Priority</label>
+        <p-select [(ngModel)]="issueForm.priority" [options]="priorityOptions" optionLabel="label" optionValue="value" class="w-full" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Summary *</label>
+      <input pInputText [(ngModel)]="issueForm.summary" placeholder="Issue summary" class="w-full" />
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea pTextarea [(ngModel)]="issueForm.description" placeholder="Describe the issue..." rows="3" class="w-full"></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showIssueDialog = false" />
+    <p-button label="Create" [loading]="submitting" [disabled]="!issueForm.summary" (onClick)="createIssue()" />
+  </ng-template>
+</p-dialog>

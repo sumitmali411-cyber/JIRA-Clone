@@ -1,22 +1,34 @@
 package com.jiraclone.service;
 
 import com.jiraclone.model.AppConfig;
-import com.jiraclone.storage.DataStore;
+import com.jiraclone.repository.AppConfigRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class ConfigService {
 
     @Autowired
-    private DataStore dataStore;
+    private AppConfigRepository appConfigRepository;
 
     public AppConfig get() {
-        return dataStore.readConfig();
+        return appConfigRepository.findById(1L).orElseGet(this::defaultConfig);
     }
 
+    @Transactional
     public AppConfig update(AppConfig config) {
-        dataStore.writeConfig(config);
-        return config;
+        config.setId(1L);
+        return appConfigRepository.save(config);
+    }
+
+    private AppConfig defaultConfig() {
+        AppConfig cfg = new AppConfig();
+        cfg.setId(1L);
+        cfg.setLabels(List.of("bug", "feature", "improvement", "documentation"));
+        cfg.setTeamMembers(List.of());
+        return cfg;
     }
 }

@@ -3,12 +3,12 @@ package com.jiraclone.service;
 import com.jiraclone.dto.ProjectDto;
 import com.jiraclone.model.Project;
 import com.jiraclone.model.enums.ProjectType;
-import com.jiraclone.storage.DataStore;
+import com.jiraclone.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,7 +17,7 @@ import java.util.UUID;
 public class ProjectService {
 
     @Autowired
-    private DataStore dataStore;
+    private ProjectRepository projectRepository;
 
     @Autowired
     private IssueService issueService;
@@ -26,21 +26,18 @@ public class ProjectService {
     private SprintService sprintService;
 
     public List<Project> getAll() {
-        return dataStore.readProjects();
+        return projectRepository.findAll();
     }
 
     public Optional<Project> getById(String id) {
-        return dataStore.readProjects().stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst();
+        return projectRepository.findById(id);
     }
 
+    @Transactional
     public Project create(ProjectDto dto) {
-        List<Project> projects = new ArrayList<>(dataStore.readProjects());
-
-        // Check unique key
-        boolean keyExists = projects.stream().anyMatch(p -> p.getKey().equalsIgnoreCase(dto.getKey()));
-        if (keyExists) throw new IllegalArgumentException("Project key already exists: " + dto.getKey());
+        if (projectRepository.existsByKeyIgnoreCase(dto.getKey())) {
+            throw new IllegalArgumentException("Project key already exists: " + dto.getKey());
+        }
 
         Project p = new Project();
         p.setId(UUID.randomUUID().toString());
@@ -54,15 +51,13 @@ public class ProjectService {
         p.setCreatedAt(Instant.now());
         p.setUpdatedAt(Instant.now());
 
-        projects.add(p);
-        dataStore.writeProjects(projects);
-        return p;
+        return projectRepository.save(p);
     }
 
+    @Transactional
     public Project update(String id, ProjectDto dto) {
-        List<Project> projects = new ArrayList<>(dataStore.readProjects());
-        Project p = projects.stream().filter(x -> x.getId().equals(id))
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("Project not found: " + id));
+        Project p = projectRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + id));
 
         if (dto.getName() != null) p.setName(dto.getName());
         if (dto.getDescription() != null) p.setDescription(dto.getDescription());
@@ -70,30 +65,27 @@ public class ProjectService {
         if (dto.getStatuses() != null) p.setStatuses(dto.getStatuses());
         p.setUpdatedAt(Instant.now());
 
-        dataStore.writeProjects(projects);
-        return p;
+        return projectRepository.save(p);
     }
 
+    @Transactional
     public void delete(String id) {
-        List<Project> projects = new ArrayList<>(dataStore.readProjects());
-        boolean removed = projects.removeIf(p -> p.getId().equals(id));
-        if (!removed) throw new IllegalArgumentException("Project not found: " + id);
-
-        dataStore.writeProjects(projects);
-        // Cascade: delete issues and sprints
+        if (!projectRepository.existsById(id)) {
+            throw new IllegalArgumentException("Project not found: " + id);
+        }
+        projectRepository.deleteById(id);
         issueService.deleteByProjectId(id);
         sprintService.deleteByProjectId(id);
     }
 
-    // Used internally to increment issue counter
+    @Transactional
     public synchronized long nextIssueNumber(String projectId) {
-        List<Project> projects = new ArrayList<>(dataStore.readProjects());
-        Project p = projects.stream().filter(x -> x.getId().equals(projectId))
-                .findFirst().orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
+        Project p = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
         long next = p.getIssueCounter() + 1;
         p.setIssueCounter(next);
         p.setUpdatedAt(Instant.now());
-        dataStore.writeProjects(projects);
+        projectRepository.save(p);
         return next;
     }
 }

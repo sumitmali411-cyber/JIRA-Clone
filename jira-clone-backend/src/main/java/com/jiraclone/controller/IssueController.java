@@ -68,7 +68,7 @@ public class IssueController {
     @GetMapping("/issues/{id}/links")
     public ResponseEntity<ApiResponse<List<IssueLink>>> getLinks(@PathVariable String id) {
         return issueService.getById(id)
-                .map(i -> ResponseEntity.ok(ApiResponse.success(i.getLinks() != null ? i.getLinks() : List.of())))
+                .map(i -> ResponseEntity.ok(ApiResponse.success(i.getLinks() != null ? (List<IssueLink>) i.getLinks() : List.<IssueLink>of())))
                 .orElse(ResponseEntity.notFound().build());
     }
 

@@ -3,7 +3,7 @@ package com.jiraclone.service;
 import com.jiraclone.dto.SearchFilterDto;
 import com.jiraclone.model.Issue;
 import com.jiraclone.model.Sprint;
-import com.jiraclone.storage.DataStore;
+import com.jiraclone.repository.SprintRepository;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jsoup.Jsoup;
@@ -23,7 +23,7 @@ public class ExportService {
     private SearchService searchService;
 
     @Autowired
-    private DataStore dataStore;
+    private SprintRepository sprintRepository;
 
     private static final String[] HEADERS = {
             "Issue Key", "Type", "Summary", "Status", "Priority", "Assignee", "Reporter",
@@ -33,13 +33,12 @@ public class ExportService {
 
     public byte[] exportToExcel(SearchFilterDto filter) throws IOException {
         List<Issue> issues = searchService.search(filter);
-        Map<String, String> sprintNames = dataStore.readSprints().stream()
+        Map<String, String> sprintNames = sprintRepository.findAll().stream()
                 .collect(Collectors.toMap(Sprint::getId, Sprint::getName, (a, b) -> a));
 
         try (XSSFWorkbook wb = new XSSFWorkbook()) {
             Sheet sheet = wb.createSheet("Issues");
 
-            // Header style
             CellStyle headerStyle = wb.createCellStyle();
             Font headerFont = wb.createFont();
             headerFont.setBold(true);
@@ -77,7 +76,6 @@ public class ExportService {
                 row.createCell(15).setCellValue(stripHtml(issue.getDescription()));
             }
 
-            // Auto-size columns
             for (int i = 0; i < HEADERS.length; i++) {
                 sheet.autoSizeColumn(i);
             }
