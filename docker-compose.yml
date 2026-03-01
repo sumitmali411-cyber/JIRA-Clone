@@ -12,3 +12,5 @@ services:
     volumes:
       # Persist H2 database so realm config survives container recreations
       - ./keycloak-data/h2:/opt/keycloak/data/h2
+      # Custom JIRA Clone theme (login page branding + registration)
+      - ./keycloak-theme/jira-clone:/opt/keycloak/themes/jira-clone

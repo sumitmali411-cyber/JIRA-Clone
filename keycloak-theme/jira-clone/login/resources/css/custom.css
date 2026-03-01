@@ -1,0 +1,96 @@
+/* ── JIRA Clone Keycloak Theme ─────────────────────────────── */
+
+/* Brand header injected by login.ftl */
+.jira-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.jira-logo-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #0052cc, #0065ff);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 82, 204, 0.4);
+}
+
+.jira-app-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #172b4d;
+  letter-spacing: -0.3px;
+}
+
+/* Card / login box */
+#kc-content {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(9, 30, 66, 0.12);
+}
+
+/* Primary button — Atlassian blue */
+.pf-c-button.pf-m-primary,
+#kc-login {
+  background-color: #0052cc !important;
+  border-color: #0052cc !important;
+  color: #fff !important;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: background-color 0.15s ease;
+}
+
+.pf-c-button.pf-m-primary:hover,
+#kc-login:hover {
+  background-color: #0065ff !important;
+  border-color: #0065ff !important;
+}
+
+/* Input focus ring — blue */
+.pf-c-form-control:focus,
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus {
+  border-color: #0052cc !important;
+  box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2) !important;
+  outline: none;
+}
+
+/* Register link */
+#kc-registration-container a,
+#kc-registration a {
+  color: #0052cc;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+#kc-registration-container a:hover,
+#kc-registration a:hover {
+  color: #0065ff;
+  text-decoration: underline;
+}
+
+/* Forgot password link */
+#kc-form-options a {
+  color: #0052cc;
+  font-size: 13px;
+}
+
+/* Error messages */
+.pf-c-helper-text__item.pf-m-error,
+.kc-feedback-text {
+  color: #de350b;
+}
+
+/* Page background */
+body {
+  background: #f4f5f7;
+}
