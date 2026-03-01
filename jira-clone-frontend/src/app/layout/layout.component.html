@@ -1,0 +1,54 @@
+<div class="app-shell" [class.sidebar-collapsed]="sidebarCollapsed">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo" [class.hidden]="sidebarCollapsed">
+        <span class="logo-icon">🎯</span>
+        <span class="logo-text">JiraClone</span>
+      </div>
+      <button pButton icon="pi pi-bars" class="p-button-text p-button-sm sidebar-toggle"
+              (click)="toggleSidebar()"></button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-label" [class.hidden]="sidebarCollapsed">NAVIGATION</div>
+      <a routerLink="/projects" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-folder"></i>
+        <span [class.hidden]="sidebarCollapsed">Projects</span>
+      </a>
+    </div>
+
+    @if (projects.length > 0) {
+      <div class="sidebar-section">
+        <div class="section-label" [class.hidden]="sidebarCollapsed">PROJECTS</div>
+        @for (project of projects; track project.id) {
+          <div class="nav-item project-item" [routerLink]="['/projects', project.id, 'board']"
+               routerLinkActive="active">
+            <span class="project-avatar">{{ project.key[0] }}</span>
+            <span [class.hidden]="sidebarCollapsed" class="project-name">{{ project.name }}</span>
+          </div>
+        }
+      </div>
+    }
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-area">
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <ng-content select="[slot=breadcrumb]"></ng-content>
+      </div>
+      <div class="top-bar-right">
+        <span class="username">{{ keycloakService.getUserFullName() }}</span>
+        <p-avatar [label]="keycloakService.getInitials()" shape="circle" size="normal" />
+        <button pButton icon="pi pi-sign-out" class="p-button-text p-button-sm"
+                pTooltip="Logout" tooltipPosition="bottom"
+                (click)="logout()"></button>
+      </div>
+    </header>
+
+    <main class="content-area">
+      <router-outlet />
+    </main>
+  </div>
+</div>
