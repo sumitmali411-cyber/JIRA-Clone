@@ -1,0 +1,163 @@
+.app-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--p-surface-ground);
+}
+
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: var(--p-surface-card);
+  border-right: 1px solid var(--p-surface-border);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.2s ease, min-width 0.2s ease;
+  overflow: hidden;
+}
+
+.app-shell.sidebar-collapsed .sidebar {
+  width: 56px;
+  min-width: 56px;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid var(--p-surface-border);
+  height: 56px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--p-primary-color);
+  white-space: nowrap;
+}
+
+.logo-icon {
+  font-size: 1.4rem;
+}
+
+.sidebar-toggle {
+  padding: 0.25rem !important;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.sidebar-section {
+  padding: 0.75rem 0;
+}
+
+.section-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--p-text-muted-color);
+  padding: 0 1rem 0.5rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  margin: 0 0.5rem;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--p-text-color);
+  font-size: 0.875rem;
+  transition: background 0.15s;
+  white-space: nowrap;
+
+  i {
+    font-size: 0.875rem;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+  }
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+    background: var(--p-surface-hover);
+  }
+
+  &.active {
+    background: var(--p-primary-100, #e0f0ff);
+    color: var(--p-primary-color);
+    font-weight: 500;
+  }
+}
+
+.project-avatar {
+  width: 20px;
+  height: 20px;
+  background: var(--p-primary-color);
+  color: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.project-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.top-bar {
+  height: 56px;
+  min-height: 56px;
+  background: var(--p-surface-card);
+  border-bottom: 1px solid var(--p-surface-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.username {
+  font-size: 0.875rem;
+  color: var(--p-text-color);
+  font-weight: 500;
+}
+
+.content-area {
+  flex: 1;
+  overflow: auto;
+  padding: 1.5rem;
+}

@@ -1,0 +1,85 @@
+<p-toast />
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Projects</h1>
+    <p class="page-subtitle">Manage your projects</p>
+  </div>
+  <p-button label="New Project" icon="pi pi-plus" (onClick)="openDialog()" />
+</div>
+
+@if (loading) {
+  <div class="loading-grid">
+    @for (i of [1,2,3]; track i) {
+      <div class="skeleton-card"></div>
+    }
+  </div>
+} @else if (projects.length === 0) {
+  <div class="empty-state">
+    <i class="pi pi-folder-open empty-icon"></i>
+    <h3>No projects yet</h3>
+    <p>Create your first project to get started</p>
+    <p-button label="Create Project" icon="pi pi-plus" (onClick)="openDialog()" />
+  </div>
+} @else {
+  <div class="project-grid">
+    @for (project of projects; track project.id) {
+      <div class="project-card" (click)="navigate(project)">
+        <div class="project-card-header">
+          <div class="project-key-badge">{{ project.key }}</div>
+          <p-tag [value]="project.type" [severity]="getTypeColor(project.type)" />
+        </div>
+        <h3 class="project-name">{{ project.name }}</h3>
+        <p class="project-desc">{{ project.description || 'No description' }}</p>
+        <div class="project-meta">
+          <span class="meta-item">
+            <i class="pi pi-ticket"></i>
+            {{ project.issueCounter }} issues
+          </span>
+          <span class="meta-item">
+            <i class="pi pi-calendar"></i>
+            {{ project.createdAt | date:'mediumDate' }}
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Create Project Dialog -->
+<p-dialog header="Create Project" [(visible)]="showDialog" [modal]="true"
+          [style]="{ width: '480px' }" [draggable]="false">
+  <div class="dialog-form">
+    <div class="form-group">
+      <label>Project Name *</label>
+      <input pInputText [(ngModel)]="form.name" (ngModelChange)="onNameChange()"
+             placeholder="My Project" class="w-full" />
+    </div>
+    <div class="form-group">
+      <label>Project Key *</label>
+      <input pInputText [(ngModel)]="form.key" (ngModelChange)="onKeyChange()"
+             placeholder="PROJ" class="w-full" style="text-transform: uppercase" />
+      @if (keyError) {
+        <small class="key-error">{{ keyError }}</small>
+      } @else {
+        <small>2–10 uppercase letters, used as issue key prefix (e.g. PROJ-1)</small>
+      }
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea pTextarea [(ngModel)]="form.description"
+                placeholder="Project description..." rows="3" class="w-full"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Type</label>
+      <p-select [(ngModel)]="form.type" [options]="typeOptions"
+                optionLabel="label" optionValue="value" class="w-full" />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showDialog = false" />
+    <p-button label="Create" icon="pi pi-check" [loading]="submitting"
+              [disabled]="!form.name || keyInvalid" (onClick)="submit()" />
+  </ng-template>
+</p-dialog>

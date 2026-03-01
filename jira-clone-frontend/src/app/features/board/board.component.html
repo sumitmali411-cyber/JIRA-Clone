@@ -1,0 +1,108 @@
+<p-toast />
+
+@if (loading) {
+  <div class="loading-center">
+    <p-progressSpinner />
+  </div>
+} @else if (project) {
+  <div class="board-header">
+    <div class="breadcrumb">
+      <a routerLink="/projects">Projects</a>
+      <i class="pi pi-angle-right"></i>
+      <span>{{ project.name }}</span>
+      <i class="pi pi-angle-right"></i>
+      <span>Board</span>
+    </div>
+    <div class="board-actions">
+      <a [routerLink]="['/projects', project.id, 'backlog']">
+        <p-button label="Backlog" icon="pi pi-list" severity="secondary" size="small" />
+      </a>
+      <p-button label="Create Issue" icon="pi pi-plus" size="small" (onClick)="openCreateDialog()" />
+    </div>
+  </div>
+
+  <div class="board-columns">
+    @for (col of columns; track col.status) {
+      <div class="board-column"
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop(col.status)">
+        <div class="column-header">
+          <span class="column-title">{{ col.status }}</span>
+          <span class="column-count">{{ col.issues.length }}</span>
+        </div>
+        <div class="column-body">
+          @for (issue of col.issues; track issue.id) {
+            <div class="issue-card"
+                 draggable="true"
+                 (dragstart)="onDragStart(issue)"
+                 (dragend)="onDragEnd()"
+                 (click)="openIssue(issue)">
+              <div class="issue-header">
+                <i [class]="getTypeIcon(issue.type)"
+                   [style.color]="getTypeColor(issue.type)"
+                   class="type-icon"></i>
+                <span class="issue-key">{{ issue.issueKey }}</span>
+              </div>
+              <div class="issue-summary">{{ issue.summary }}</div>
+              <div class="issue-footer">
+                <i [class]="getPriorityIcon(issue.priority)"
+                   [style.color]="getPriorityColor(issue.priority)"></i>
+                @if (issue.storyPoints) {
+                  <span class="story-points">{{ issue.storyPoints }}sp</span>
+                }
+                @if (issue.assignee) {
+                  <span class="assignee-avatar" [title]="issue.assignee">
+                    {{ issue.assignee[0].toUpperCase() }}
+                  </span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Create Issue Dialog -->
+<p-dialog header="Create Issue" [(visible)]="showCreateDialog" [modal]="true"
+          [style]="{ width: '500px' }" [draggable]="false">
+  <div class="dialog-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Type</label>
+        <p-select [(ngModel)]="form.type" [options]="typeOptions"
+                  optionLabel="label" optionValue="value" class="w-full" />
+      </div>
+      <div class="form-group">
+        <label>Priority</label>
+        <p-select [(ngModel)]="form.priority" [options]="priorityOptions"
+                  optionLabel="label" optionValue="value" class="w-full" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Summary *</label>
+      <input pInputText [(ngModel)]="form.summary" placeholder="Issue summary" class="w-full" />
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea pTextarea [(ngModel)]="form.description"
+                placeholder="Describe the issue..." rows="4" class="w-full"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Assignee</label>
+        <input pInputText [(ngModel)]="form.assignee" placeholder="Username" class="w-full" />
+      </div>
+      <div class="form-group">
+        <label>Story Points</label>
+        <input pInputText [(ngModel)]="form.storyPoints" type="number" placeholder="0" class="w-full" />
+      </div>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showCreateDialog = false" />
+    <p-button label="Create" icon="pi pi-check" [loading]="submitting"
+              [disabled]="!form.summary" (onClick)="createIssue()" />
+  </ng-template>
+</p-dialog>
