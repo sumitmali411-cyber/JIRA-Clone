@@ -22,3 +22,15 @@ logs/
 # Environment
 .env
 .env.local
+
+# ── Frontend ──────────────────────────────────────────────
+node_modules/
+jira-clone-frontend/dist/
+jira-clone-frontend/.angular/
+jira-clone-frontend/coverage/
+
+# ── Backend ───────────────────────────────────────────────
+jira-clone-backend/target/
+
+# ── Keycloak exported data ────────────────────────────────
+keycloak-data/

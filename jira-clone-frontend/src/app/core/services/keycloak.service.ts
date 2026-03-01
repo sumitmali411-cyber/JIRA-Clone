@@ -10,14 +10,20 @@ export class KeycloakService {
     clientId: environment.keycloak.clientId
   });
 
-  init(): Promise<void> {
-    return this.keycloak
-      .init({ onLoad: 'login-required', checkLoginIframe: false })
-      .then(() => undefined);
+  isAvailable = false;
+
+  async init(): Promise<void> {
+    try {
+      await this.keycloak.init({ onLoad: 'login-required', checkLoginIframe: false });
+      this.isAvailable = true;
+    } catch {
+      console.warn('Keycloak unavailable — running without authentication');
+    }
   }
 
   getToken(): Promise<string> {
-    return this.keycloak.updateToken(30).then(() => this.keycloak.token!);
+    if (!this.isAvailable) return Promise.resolve('');
+    return this.keycloak.updateToken(30).then(() => this.keycloak.token ?? '').catch(() => '');
   }
 
   logout(): void {

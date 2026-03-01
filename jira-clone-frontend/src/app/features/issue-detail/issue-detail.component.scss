@@ -143,3 +143,32 @@
 }
 
 .w-full { width: 100%; }
+
+.commits-section {
+  h4 { font-size: 0.875rem; font-weight: 600; color: var(--p-text-muted-color);
+       text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+}
+
+.commit-item {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--p-surface-border);
+  &:last-child { border-bottom: none; }
+}
+
+.commit-main {
+  display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.25rem;
+}
+
+.commit-sha {
+  font-family: monospace; font-weight: 700; font-size: 0.85rem;
+  color: var(--p-primary-color); text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+
+.commit-message { font-size: 0.875rem; color: var(--p-text-color); }
+
+.commit-meta {
+  font-size: 0.75rem; color: var(--p-text-muted-color);
+  display: flex; align-items: center; gap: 0.25rem;
+  i { font-size: 0.7rem; }
+}

@@ -13,7 +13,7 @@ import { DividerModule } from 'primeng/divider';
 import { MessageService } from 'primeng/api';
 import { IssueService } from '../../core/services/issue.service';
 import { CommentService } from '../../core/services/comment.service';
-import { Issue, Priority, IssueType } from '../../core/models/issue.model';
+import { Issue, Priority, IssueType, GitCommit } from '../../core/models/issue.model';
 import { Comment } from '../../core/models/comment.model';
 import { forkJoin } from 'rxjs';
 
@@ -161,5 +161,9 @@ export class IssueDetailComponent implements OnInit {
   getTypeColor(t: string) {
     const m: Record<string, string> = { EPIC: '#9b59b6', STORY: '#27ae60', TASK: '#3498db', BUG: '#e74c3c', SUB_TASK: '#95a5a6' };
     return m[t] || '#3498db';
+  }
+
+  getBranchName(branch: string): string {
+    return branch.replace('refs/heads/', '');
   }
 }

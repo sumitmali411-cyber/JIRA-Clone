@@ -7,10 +7,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IssueRepository extends JpaRepository<Issue, String> {
     List<Issue> findByProjectId(String projectId);
+
+    Optional<Issue> findByIssueKey(String issueKey);
 
     void deleteByProjectId(String projectId);
 

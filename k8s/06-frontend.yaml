@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jira-clone-frontend
+  namespace: jira-clone
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jira-clone-frontend
+  template:
+    metadata:
+      labels:
+        app: jira-clone-frontend
+    spec:
+      containers:
+        - name: jira-clone-frontend
+          image: jira-clone-frontend:1.0.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: jira-clone-frontend
+  namespace: jira-clone
+spec:
+  selector:
+    app: jira-clone-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80

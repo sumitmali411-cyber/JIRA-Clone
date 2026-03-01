@@ -11,6 +11,18 @@ export interface IssueLink {
   linkType: LinkType;
 }
 
+export interface GitCommit {
+  sha: string;
+  shortSha: string;
+  message: string;
+  url: string;
+  authorName: string;
+  authorEmail: string;
+  timestamp: string;
+  branch: string;
+  repoFullName: string;
+}
+
 export interface Issue {
   id: string;
   projectId: string;
@@ -33,6 +45,7 @@ export interface Issue {
   createdAt: string;
   updatedAt: string;
   links: IssueLink[];
+  gitCommits: GitCommit[];
 }
 
 export interface IssueDto {

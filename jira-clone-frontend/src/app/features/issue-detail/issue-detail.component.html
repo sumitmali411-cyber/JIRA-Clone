@@ -63,7 +63,7 @@
 
         @for (comment of comments; track comment.id) {
           <div class="comment-item">
-            <div class="comment-avatar">{{ comment.author?.[0]?.toUpperCase() || 'U' }}</div>
+            <div class="comment-avatar">{{ comment.author[0].toUpperCase() || 'U' }}</div>
             <div class="comment-body">
               <div class="comment-header">
                 <span class="comment-author">{{ comment.author || 'Unknown' }}</span>
@@ -88,6 +88,29 @@
                     (onClick)="addComment()" />
         </div>
       </div>
+
+      <!-- Git Commits -->
+      @if (issue.gitCommits && issue.gitCommits.length > 0) {
+        <p-divider />
+        <div class="commits-section">
+          <h4><i class="pi pi-github" style="margin-right:6px;"></i>Linked Commits ({{ issue.gitCommits.length }})</h4>
+          @for (commit of issue.gitCommits; track commit.sha) {
+            <div class="commit-item">
+              <div class="commit-main">
+                <a [href]="commit.url" target="_blank" class="commit-sha">{{ commit.shortSha }}</a>
+                <span class="commit-message">{{ commit.message }}</span>
+              </div>
+              <div class="commit-meta">
+                <i class="pi pi-user"></i> {{ commit.authorName }}
+                &nbsp;·&nbsp;
+                <i class="pi pi-code-branch"></i> {{ getBranchName(commit.branch) }}
+                &nbsp;·&nbsp;
+                {{ commit.timestamp | date:'medium' }}
+              </div>
+            </div>
+          }
+        </div>
+      }
     </div>
 
     <!-- Right: Sidebar details -->
@@ -152,7 +175,7 @@
           <span class="detail-value">{{ issue.updatedAt | date:'medium' }}</span>
         </div>
 
-        @if (issue.labels?.length) {
+        @if (issue.labels.length) {
           <div class="detail-row labels-row">
             <span class="detail-label">Labels</span>
             <div class="labels-list">

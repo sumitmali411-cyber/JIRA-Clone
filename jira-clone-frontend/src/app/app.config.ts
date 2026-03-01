@@ -28,7 +28,7 @@ export const appConfig: ApplicationConfig = {
     }),
     {
       provide: APP_INITIALIZER,
-      useFactory: (kc: KeycloakService) => () => kc.init(),
+      useFactory: (kc: KeycloakService) => () => kc.init().catch(() => {}),
       deps: [KeycloakService],
       multi: true
     }

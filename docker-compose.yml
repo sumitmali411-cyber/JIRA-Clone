@@ -5,5 +5,10 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      # Cap JVM heap to prevent OOM kills when running alongside other services
+      JAVA_OPTS_APPEND: "-Xms64m -Xmx256m"
     ports:
       - "8180:8080"
+    volumes:
+      # Persist H2 database so realm config survives container recreations
+      - ./keycloak-data/h2:/opt/keycloak/data/h2

@@ -1,5 +1,6 @@
 package com.jiraclone.model;
 
+import com.jiraclone.converter.GitCommitListConverter;
 import com.jiraclone.converter.IssueLinkListConverter;
 import com.jiraclone.converter.StringListConverter;
 import com.jiraclone.model.enums.IssueType;
@@ -60,4 +61,8 @@ public class Issue {
     @Convert(converter = IssueLinkListConverter.class)
     @Column(name = "links", columnDefinition = "TEXT")
     private List<IssueLink> links;
+
+    @Convert(converter = GitCommitListConverter.class)
+    @Column(name = "git_commits", columnDefinition = "TEXT")
+    private List<GitCommit> gitCommits;
 }
