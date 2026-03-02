@@ -4,10 +4,15 @@ metadata:
   name: jira-clone-backend
   namespace: jira-clone
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: jira-clone-backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0       # zero-downtime deploys
   template:
     metadata:
       labels:
@@ -59,6 +64,27 @@ spec:
           volumeMounts:
             - name: backend-config
               mountPath: /app/config
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /v3/api-docs
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 20
+            failureThreshold: 4
+          readinessProbe:
+            httpGet:
+              path: /v3/api-docs
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 3
       volumes:
         - name: backend-config
           configMap:
@@ -78,3 +104,31 @@ spec:
     - name: http
       port: 8080
       targetPort: 8080
+
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: jira-clone-backend-hpa
+  namespace: jira-clone
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: jira-clone-backend
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
