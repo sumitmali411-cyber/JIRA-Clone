@@ -13,10 +13,15 @@ data:
     spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
     spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
-    spring.jpa.hibernate.ddl-auto=update
+    spring.jpa.hibernate.ddl-auto=validate
     spring.jpa.show-sql=false
     spring.jpa.properties.hibernate.format_sql=false
     spring.jpa.properties.hibernate.jdbc.time_zone=UTC
+
+    spring.flyway.enabled=true
+    spring.flyway.locations=classpath:db/migration
+    spring.flyway.baseline-on-migrate=true
+    spring.flyway.baseline-version=0
 
     spring.jackson.serialization.indent-output=false
     spring.jackson.default-property-inclusion=non_null
