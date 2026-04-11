@@ -22,6 +22,18 @@ export const routes: Routes = [
       {
         path: 'issues/:issueId',
         loadComponent: () => import('./features/issue-detail/issue-detail.component').then(m => m.IssueDetailComponent)
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'search',
+        loadComponent: () => import('./features/search/search.component').then(m => m.SearchComponent)
+      },
+      {
+        path: 'sprints',
+        loadComponent: () => import('./features/sprints/sprints.component').then(m => m.SprintsComponent)
       }
     ]
   }

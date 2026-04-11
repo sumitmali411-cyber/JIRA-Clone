@@ -1,0 +1,169 @@
+<p-toast />
+
+<div class="search-header">
+  <h1 class="page-title">Search</h1>
+  <span class="page-subtitle">Search issues across all projects</span>
+</div>
+
+<!-- Search Input -->
+<div class="search-bar-row">
+  <div class="search-input-wrapper">
+    <i class="pi pi-search search-icon"></i>
+    <input
+      pInputText
+      class="search-input"
+      placeholder="Search issues by summary, key, description..."
+      [value]="query"
+      (input)="onQueryChange($any($event.target).value)"
+      aria-label="Search issues"
+    />
+    @if (loading) {
+      <i class="pi pi-spin pi-spinner search-spinner"></i>
+    }
+    @if (query || activeFilters.length > 0) {
+      <button class="search-clear-btn" (click)="clearAll()" aria-label="Clear search" title="Clear all">
+        <i class="pi pi-times"></i>
+      </button>
+    }
+  </div>
+</div>
+
+<!-- Filter Row -->
+<div class="filter-row">
+  <div class="filter-group">
+    <label class="filter-label">Project</label>
+    <p-select
+      [(ngModel)]="filterProject"
+      [options]="projectOptions"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="All Projects"
+      (onChange)="applyFilters()"
+      styleClass="filter-select"
+    />
+  </div>
+  <div class="filter-group">
+    <label class="filter-label">Status</label>
+    <p-select
+      [(ngModel)]="filterStatus"
+      [options]="statusOptions"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="All Statuses"
+      (onChange)="applyFilters()"
+      styleClass="filter-select"
+    />
+  </div>
+  <div class="filter-group">
+    <label class="filter-label">Type</label>
+    <p-select
+      [(ngModel)]="filterType"
+      [options]="typeOptions"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="All Types"
+      (onChange)="applyFilters()"
+      styleClass="filter-select"
+    />
+  </div>
+  <div class="filter-group">
+    <label class="filter-label">Priority</label>
+    <p-select
+      [(ngModel)]="filterPriority"
+      [options]="priorityOptions"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="All Priorities"
+      (onChange)="applyFilters()"
+      styleClass="filter-select"
+    />
+  </div>
+</div>
+
+<!-- Active Filter Chips -->
+@if (activeFilters.length > 0) {
+  <div class="chip-row">
+    @for (chip of activeFilters; track chip.key) {
+      <span class="filter-chip">
+        <span class="chip-label">{{ chip.label }}:</span>
+        <span class="chip-value">{{ chip.displayValue }}</span>
+        <button class="chip-remove" (click)="removeFilter(chip)" [attr.aria-label]="'Remove ' + chip.label + ' filter'">
+          <i class="pi pi-times"></i>
+        </button>
+      </span>
+    }
+  </div>
+}
+
+<!-- Results -->
+@if (!hasSearched && !loading) {
+  <div class="empty-state">
+    <i class="pi pi-search"></i>
+    <span>Start typing to search for issues</span>
+  </div>
+} @else if (loading) {
+  <div class="loading-center">
+    <p-progressSpinner strokeWidth="3" />
+  </div>
+} @else if (results.length === 0) {
+  <div class="empty-state">
+    <i class="pi pi-inbox"></i>
+    <span>No issues found matching your search</span>
+  </div>
+} @else {
+  <div class="results-header">
+    <span class="results-count">{{ results.length }} result{{ results.length !== 1 ? 's' : '' }} found</span>
+  </div>
+
+  <p-table
+    [value]="results"
+    [showGridlines]="false"
+    [stripedRows]="true"
+    styleClass="p-datatable-sm search-results-table"
+    [tableStyle]="{'min-width': '600px'}"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 3rem"></th>
+        <th>Key</th>
+        <th>Summary</th>
+        <th>Status</th>
+        <th>Priority</th>
+        <th>Assignee</th>
+        <th>Updated</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-issue>
+      <tr class="result-row" (click)="openIssue(issue)" (keydown.enter)="openIssue(issue)" tabindex="0" role="button" [attr.aria-label]="'Open issue ' + issue.issueKey">
+        <td>
+          <i [class]="getTypeIcon(issue.type)" [style.color]="getTypeColor(issue.type)" class="type-icon"></i>
+        </td>
+        <td>
+          <span class="issue-key">{{ issue.issueKey }}</span>
+        </td>
+        <td>
+          <span class="issue-summary">{{ issue.summary }}</span>
+        </td>
+        <td>
+          <span class="status-badge">{{ issue.status }}</span>
+        </td>
+        <td>
+          <div class="priority-cell">
+            <i [class]="getPriorityIcon(issue.priority)" [style.color]="getPriorityColor(issue.priority)"></i>
+            <span class="priority-text">{{ issue.priority | titlecase }}</span>
+          </div>
+        </td>
+        <td>
+          @if (issue.assignee) {
+            <span class="assignee-chip">{{ issue.assignee }}</span>
+          } @else {
+            <span class="unassigned">Unassigned</span>
+          }
+        </td>
+        <td>
+          <span class="date-cell">{{ issue.updatedAt | date:'MMM d, yyyy' }}</span>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+}

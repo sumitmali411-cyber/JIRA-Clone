@@ -1,0 +1,286 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="sprints-header">
+  <div class="header-left">
+    <h1 class="page-title">Sprint Management</h1>
+    <span class="page-subtitle">Manage sprints across your projects</span>
+  </div>
+  <div class="header-right">
+    @if (projects.length > 0) {
+      <p-select
+        [(ngModel)]="selectedProjectId"
+        [options]="projectOptions"
+        optionLabel="label"
+        optionValue="value"
+        (onChange)="onProjectChange()"
+        styleClass="project-select"
+        aria-label="Select project"
+      />
+    }
+    <p-button
+      label="Create Sprint"
+      icon="pi pi-plus"
+      size="small"
+      [disabled]="!selectedProjectId"
+      (onClick)="openCreateDialog()"
+    />
+  </div>
+</div>
+
+@if (loading) {
+  <div class="loading-center">
+    <p-progressSpinner />
+  </div>
+} @else if (projects.length === 0) {
+  <div class="empty-state">
+    <i class="pi pi-folder-open"></i>
+    <span>No projects found. Create a project first.</span>
+    <a routerLink="/projects">
+      <p-button label="Go to Projects" icon="pi pi-external-link" severity="secondary" size="small" />
+    </a>
+  </div>
+} @else {
+
+  <!-- Active Sprints -->
+  @if (activeSprints.length > 0) {
+    <div class="sprint-section">
+      <div class="section-title">
+        <i class="pi pi-play-circle section-icon section-icon--active"></i>
+        <span>Active Sprints</span>
+        <span class="section-count">{{ activeSprints.length }}</span>
+      </div>
+      <div class="sprint-cards">
+        @for (sprint of activeSprints; track sprint.id) {
+          <div class="sprint-card sprint-card--active">
+            <div class="sprint-card-header">
+              <div class="sprint-name-row">
+                <p-tag value="ACTIVE" severity="success" />
+                <span class="sprint-name">{{ sprint.name }}</span>
+              </div>
+              <div class="sprint-actions">
+                <p-button icon="pi pi-pencil" severity="secondary" size="small"
+                          pTooltip="Edit" tooltipPosition="top"
+                          (onClick)="openEditDialog(sprint)" />
+                <p-button label="Complete Sprint" icon="pi pi-check" severity="warn" size="small"
+                          (onClick)="completeSprint(sprint)" />
+              </div>
+            </div>
+
+            @if (sprint.goal) {
+              <p class="sprint-goal">{{ sprint.goal }}</p>
+            }
+
+            <div class="sprint-dates">
+              @if (sprint.startDate) {
+                <span><i class="pi pi-calendar"></i> {{ sprint.startDate | date:'MMM d' }}</span>
+              }
+              @if (sprint.endDate) {
+                <span><i class="pi pi-calendar-times"></i> {{ sprint.endDate | date:'MMM d, yyyy' }}</span>
+              }
+            </div>
+
+            <div class="sprint-stats">
+              <div class="stat-item">
+                <span class="stat-num">{{ sprint.issueCount }}</span>
+                <span class="stat-lbl">Total</span>
+              </div>
+              <div class="stat-item stat-item--progress">
+                <span class="stat-num">{{ sprint.inProgressCount }}</span>
+                <span class="stat-lbl">In Progress</span>
+              </div>
+              <div class="stat-item stat-item--done">
+                <span class="stat-num">{{ sprint.doneCount }}</span>
+                <span class="stat-lbl">Done</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-num">{{ getProgressPercent(sprint) }}%</span>
+                <span class="stat-lbl">Complete</span>
+              </div>
+            </div>
+
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" [style.width.%]="getProgressPercent(sprint)"></div>
+              </div>
+            </div>
+
+            <div class="sprint-card-footer">
+              <a [routerLink]="['/projects', sprint.projectId, 'backlog']" class="backlog-link">
+                <i class="pi pi-list"></i> View in Backlog
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Planned Sprints -->
+  @if (plannedSprints.length > 0) {
+    <div class="sprint-section">
+      <div class="section-title">
+        <i class="pi pi-clock section-icon section-icon--planned"></i>
+        <span>Planned Sprints</span>
+        <span class="section-count">{{ plannedSprints.length }}</span>
+      </div>
+      <div class="sprint-list">
+        @for (sprint of plannedSprints; track sprint.id) {
+          <div class="sprint-row">
+            <div class="sprint-row-left">
+              <p-tag value="PLANNED" severity="info" />
+              <span class="sprint-row-name">{{ sprint.name }}</span>
+              @if (sprint.goal) {
+                <span class="sprint-row-goal">{{ sprint.goal }}</span>
+              }
+            </div>
+            <div class="sprint-row-meta">
+              @if (sprint.startDate) {
+                <span class="sprint-date"><i class="pi pi-calendar"></i> {{ sprint.startDate | date:'MMM d' }} – {{ sprint.endDate | date:'MMM d, yyyy' }}</span>
+              }
+              <span class="issue-count-badge">{{ sprint.issueCount }} issue{{ sprint.issueCount !== 1 ? 's' : '' }}</span>
+            </div>
+            <div class="sprint-row-actions">
+              <p-button icon="pi pi-pencil" severity="secondary" size="small"
+                        pTooltip="Edit" tooltipPosition="top"
+                        (onClick)="openEditDialog(sprint)" />
+              <p-button label="Start" icon="pi pi-play" severity="info" size="small"
+                        (onClick)="startSprint(sprint)" />
+              <p-button icon="pi pi-trash" severity="danger" size="small"
+                        pTooltip="Delete" tooltipPosition="top"
+                        (onClick)="deleteSprint(sprint)" />
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- No planned or active -->
+  @if (activeSprints.length === 0 && plannedSprints.length === 0) {
+    <div class="empty-state">
+      <i class="pi pi-flag"></i>
+      <span>No sprints yet. Create your first sprint to get started.</span>
+    </div>
+  }
+
+  <!-- Completed Sprints -->
+  @if (completedSprints.length > 0) {
+    <div class="sprint-section sprint-section--completed">
+      <div class="section-title">
+        <i class="pi pi-check-circle section-icon section-icon--done"></i>
+        <span>Completed Sprints</span>
+        <span class="section-count">{{ completedSprints.length }}</span>
+      </div>
+      <p-table
+        [value]="completedSprints"
+        [showGridlines]="false"
+        [stripedRows]="true"
+        styleClass="p-datatable-sm"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            <th>Goal</th>
+            <th>Dates</th>
+            <th class="text-center">Issues</th>
+            <th class="text-center">Done</th>
+            <th class="text-center">Velocity</th>
+            <th>Completed</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-sprint>
+          <tr>
+            <td>
+              <div class="completed-name-cell">
+                <p-tag value="DONE" severity="secondary" />
+                <span>{{ sprint.name }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="completed-goal">{{ sprint.goal || '—' }}</span>
+            </td>
+            <td>
+              <span class="date-range">
+                {{ sprint.startDate | date:'MMM d' }} – {{ sprint.endDate | date:'MMM d, yyyy' }}
+              </span>
+            </td>
+            <td class="text-center">{{ sprint.issueCount }}</td>
+            <td class="text-center">
+              <span class="count-done">{{ sprint.doneCount }}</span>
+            </td>
+            <td class="text-center">
+              <span class="velocity-badge">{{ getProgressPercent(sprint) }}%</span>
+            </td>
+            <td>
+              <span class="date-cell">{{ sprint.completedAt | date:'MMM d, yyyy' }}</span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  }
+}
+
+<!-- Create Sprint Dialog -->
+<p-dialog header="Create Sprint" [(visible)]="showCreateDialog" [modal]="true"
+          [style]="{ width: '480px' }" [draggable]="false">
+  <div class="dialog-form">
+    <div class="form-group">
+      <label>Sprint Name *</label>
+      <input pInputText [(ngModel)]="createForm.name" placeholder="e.g. Sprint 1" class="w-full"
+             (keydown.enter)="createSprint()" />
+    </div>
+    <div class="form-group">
+      <label>Goal</label>
+      <textarea pTextarea [(ngModel)]="createForm.goal"
+                placeholder="What do you want to achieve?" rows="2" class="w-full"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Start Date</label>
+        <input pInputText [(ngModel)]="createForm.startDate" type="date" class="w-full" />
+      </div>
+      <div class="form-group">
+        <label>End Date</label>
+        <input pInputText [(ngModel)]="createForm.endDate" type="date" class="w-full" />
+      </div>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showCreateDialog = false" />
+    <p-button label="Create Sprint" icon="pi pi-plus" [loading]="submitting"
+              [disabled]="!createForm.name" (onClick)="createSprint()" />
+  </ng-template>
+</p-dialog>
+
+<!-- Edit Sprint Dialog -->
+<p-dialog header="Edit Sprint" [(visible)]="showEditDialog" [modal]="true"
+          [style]="{ width: '480px' }" [draggable]="false">
+  <div class="dialog-form">
+    <div class="form-group">
+      <label>Sprint Name *</label>
+      <input pInputText [(ngModel)]="editForm.name" placeholder="Sprint name" class="w-full" />
+    </div>
+    <div class="form-group">
+      <label>Goal</label>
+      <textarea pTextarea [(ngModel)]="editForm.goal"
+                placeholder="Sprint goal..." rows="2" class="w-full"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Start Date</label>
+        <input pInputText [(ngModel)]="editForm.startDate" type="date" class="w-full" />
+      </div>
+      <div class="form-group">
+        <label>End Date</label>
+        <input pInputText [(ngModel)]="editForm.endDate" type="date" class="w-full" />
+      </div>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" (onClick)="showEditDialog = false" />
+    <p-button label="Save Changes" icon="pi pi-check" [loading]="submitting"
+              [disabled]="!editForm.name" (onClick)="saveSprint()" />
+  </ng-template>
+</p-dialog>

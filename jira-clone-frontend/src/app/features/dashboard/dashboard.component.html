@@ -1,0 +1,186 @@
+<p-toast />
+
+@if (loading) {
+  <div class="loading-center">
+    <p-progressSpinner />
+  </div>
+} @else {
+  <div class="dashboard-header">
+    <h1 class="page-title">Dashboard</h1>
+    <span class="page-subtitle">Overview of all projects and activity</span>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="stats-grid">
+    <div class="stat-card stat-card--total">
+      <div class="stat-icon"><i class="pi pi-list"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ totalIssues }}</div>
+        <div class="stat-label">Total Issues</div>
+      </div>
+    </div>
+    <div class="stat-card stat-card--open">
+      <div class="stat-icon"><i class="pi pi-inbox"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ totalOpen }}</div>
+        <div class="stat-label">To Do</div>
+      </div>
+    </div>
+    <div class="stat-card stat-card--progress">
+      <div class="stat-icon"><i class="pi pi-spin pi-spinner"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ totalInProgress }}</div>
+        <div class="stat-label">In Progress</div>
+      </div>
+    </div>
+    <div class="stat-card stat-card--done">
+      <div class="stat-icon"><i class="pi pi-check-circle"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ totalDone }}</div>
+        <div class="stat-label">Done</div>
+      </div>
+    </div>
+    <div class="stat-card stat-card--sprint">
+      <div class="stat-icon"><i class="pi pi-flag"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ activeSprints.length }}</div>
+        <div class="stat-label">Active Sprints</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <!-- Sprint Velocity -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-title">Sprint Velocity</span>
+        <span class="chart-subtitle">Last 6 completed sprints</span>
+      </div>
+      <div class="chart-body">
+        @if (velocityChartData && $any(velocityChartData)['labels']?.length > 0) {
+          <p-chart type="bar" [data]="velocityChartData" [options]="velocityChartOptions" height="220px" />
+        } @else {
+          <div class="empty-chart">
+            <i class="pi pi-chart-bar"></i>
+            <span>No completed sprints yet</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Burndown Chart -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-title">Active Sprint Burndown</span>
+        @if (activeSprints.length > 0) {
+          <p-tag [value]="activeSprints[0].name" severity="success" />
+        }
+      </div>
+      <div class="chart-body">
+        @if (activeSprints.length > 0 && $any(burndownChartData)['labels']?.length > 0) {
+          <p-chart type="line" [data]="burndownChartData" [options]="burndownChartOptions" height="220px" />
+        } @else {
+          <div class="empty-chart">
+            <i class="pi pi-chart-line"></i>
+            <span>No active sprint</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-row">
+    <!-- Project Stats Table -->
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-title">Project Overview</span>
+        <a routerLink="/projects" class="section-link">
+          <i class="pi pi-external-link"></i> View all
+        </a>
+      </div>
+      @if (projectStats.length === 0) {
+        <div class="empty-state">
+          <i class="pi pi-folder-open"></i>
+          <span>No projects found</span>
+        </div>
+      } @else {
+        <p-table [value]="projectStats" [showGridlines]="false" [stripedRows]="true"
+                 styleClass="p-datatable-sm">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Project</th>
+              <th class="text-center">To Do</th>
+              <th class="text-center">In Progress</th>
+              <th class="text-center">Done</th>
+              <th class="text-center">Total</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-stat>
+            <tr>
+              <td>
+                <div class="project-cell">
+                  <span class="project-key-badge">{{ stat.project.key }}</span>
+                  <a [routerLink]="['/projects', stat.project.id, 'board']" class="project-name-link">
+                    {{ stat.project.name }}
+                  </a>
+                </div>
+              </td>
+              <td class="text-center">
+                <span class="count-badge count-badge--open">{{ stat.open }}</span>
+              </td>
+              <td class="text-center">
+                <span class="count-badge count-badge--progress">{{ stat.inProgress }}</span>
+              </td>
+              <td class="text-center">
+                <span class="count-badge count-badge--done">{{ stat.done }}</span>
+              </td>
+              <td class="text-center">
+                <span class="count-badge">{{ stat.total }}</span>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </div>
+
+    <!-- Recent Activity Feed -->
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-title">Recent Activity</span>
+        <span class="section-meta">Last 10 updated issues</span>
+      </div>
+      @if (recentIssues.length === 0) {
+        <div class="empty-state">
+          <i class="pi pi-history"></i>
+          <span>No recent activity</span>
+        </div>
+      } @else {
+        <div class="activity-feed">
+          @for (issue of recentIssues; track issue.id) {
+            <a [routerLink]="['/issues', issue.id]" class="activity-item">
+              <i [class]="getTypeIcon(issue.type)"
+                 [style.color]="getTypeColor(issue.type)"
+                 class="activity-type-icon"></i>
+              <div class="activity-content">
+                <div class="activity-key-summary">
+                  <span class="activity-key">{{ issue.issueKey }}</span>
+                  <span class="activity-summary">{{ issue.summary }}</span>
+                </div>
+                <div class="activity-meta">
+                  <i [class]="getPriorityIcon(issue.priority)"
+                     [style.color]="getPriorityColor(issue.priority)"
+                     class="activity-priority"></i>
+                  <span class="activity-status">{{ issue.status }}</span>
+                  @if (issue.assignee) {
+                    <span class="activity-assignee">{{ issue.assignee }}</span>
+                  }
+                </div>
+              </div>
+              <span class="activity-time">{{ issue.updatedAt | date:'MMM d' }}</span>
+            </a>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

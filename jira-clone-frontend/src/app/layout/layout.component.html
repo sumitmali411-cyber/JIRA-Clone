@@ -12,9 +12,21 @@
 
     <div class="sidebar-section">
       <div class="section-label" [class.hidden]="sidebarCollapsed">NAVIGATION</div>
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-home"></i>
+        <span [class.hidden]="sidebarCollapsed">Dashboard</span>
+      </a>
       <a routerLink="/projects" routerLinkActive="active" class="nav-item">
         <i class="pi pi-folder"></i>
         <span [class.hidden]="sidebarCollapsed">Projects</span>
+      </a>
+      <a routerLink="/sprints" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-flag"></i>
+        <span [class.hidden]="sidebarCollapsed">Sprints</span>
+      </a>
+      <a routerLink="/search" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-search"></i>
+        <span [class.hidden]="sidebarCollapsed">Search</span>
       </a>
     </div>
 
