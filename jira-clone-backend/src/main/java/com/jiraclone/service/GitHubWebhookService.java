@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HexFormat;
@@ -38,12 +39,17 @@ public class GitHubWebhookService {
 
     public boolean isSignatureValid(String payload, String signatureHeader) {
         if (signatureHeader == null || !signatureHeader.startsWith("sha256=")) return false;
+        if (webhookSecret == null || webhookSecret.isBlank()) return false;
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(webhookSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
             byte[] digest = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
             String expected = "sha256=" + HexFormat.of().formatHex(digest);
-            return expected.equals(signatureHeader);
+            // Constant-time: String.equals short-circuits on the first differing
+            // character, which leaks the prefix length an attacker has guessed.
+            return MessageDigest.isEqual(
+                    expected.getBytes(StandardCharsets.UTF_8),
+                    signatureHeader.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             return false;
         }
